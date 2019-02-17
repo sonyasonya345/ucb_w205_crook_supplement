@@ -198,10 +198,26 @@ docker-compose exec mids bash -c "cat /w205/kafka/github-example-large.json | jq
 docker-compose exec mids bash -c "cat /w205/kafka/github-example-large.json | jq '.[]' -c"
 ```
 
+Note:
+    | jq '.':   
+    pip with jq, more human reading friendly
+
+    -c:    
+    computer readable format. Still readable text.  
+    The black space inbetween each object indicte each object.
+
 Publish some test messages to that topic with the kafka console producer
 ```
 docker-compose exec mids bash -c "cat /w205/kafka/github-example-large.json | jq '.[]' -c | kafkacat -P -b kafka:29092 -t foo && echo 'Produced 100 messages.'"
 ```
+
+Note:
+- exec in the mids container where the kafkcat is
+-P: publisher or producer
+-b: whichever broker
+- kafka:29092 == connecting to kafka container port 29092
+
+
 
 Should see something like
 ```
@@ -210,17 +226,27 @@ Produced 100 messages.
 
 Consume the messsages
 
-We can either do what we did before
+We can either do what we did before, which is:
+- inside the kafka container
+- execute kafka-console-consumer
+
 ```
 docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:29092 --topic foo --from-beginning --max-messages 42
 ```
 
-or
+or:
+- use Kafkacat in container MIDS
+- runs Kafkacat with -C (capitalized C)
+- consume from topic foo (-t foo)
+- from begining to the end (-o begging -e)
+
 ```
 docker-compose exec mids bash -c "kafkacat -C -b kafka:29092 -t foo -o beginning -e"
 ```
 
-and maybe
+and maybe:
+- pump the the message into word count (wc -l)
+- -l == number of lines
 ```
 docker-compose exec mids bash -c "kafkacat -C -b kafka:29092 -t foo -o beginning -e" | wc -l
 ```
